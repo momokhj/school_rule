@@ -240,7 +240,7 @@ const SPACES = [
     emoji: '🚶',
     badge: '이동 공간',
     url: '?space=hallway',
-    photo: 'https://drive.google.com/uc?export=view&id=1zA70kuXd1VMYSoO1P63QQW_8iva82WHz',
+    photo: 'https://raw.githubusercontent.com/momokhj/school_rule/main/hallway.jpg',
     rules: [
       '오른쪽으로 걸어요',
       '천천히 걸어요'
@@ -252,7 +252,7 @@ const SPACES = [
     emoji: '♿',
     badge: '무장애 이동',
     url: '?space=ramp',
-    photo: 'https://drive.google.com/uc?export=view&id=1z7agvXVg96_fl89F7kmjZM8sAKzdfz2J',
+    photo: 'https://raw.githubusercontent.com/momokhj/school_rule/main/ramp.jpg',
     rules: [
       '휠체어를 타는 친구가 먼저 이용해요',
       '천천히 걸어요'
@@ -264,7 +264,7 @@ const SPACES = [
     emoji: '🛗',
     badge: '우선 이용 시설',
     url: '?space=elevator',
-    photo: 'https://drive.google.com/uc?export=view&id=1KZLyZQwANsAG8pX0h9Sakeg5lm5g3w1u',
+    photo: 'https://raw.githubusercontent.com/momokhj/school_rule/main/elevator.jpg',
     rules: [
       '엘리베이터 안에서 뛰거나 장난치지 않아요',
       '버튼을 여러 번 누르지 않아요',
@@ -277,7 +277,7 @@ const SPACES = [
     emoji: '🪜',
     badge: '이동 공간',
     url: '?space=stairs',
-    photo: 'https://drive.google.com/uc?export=view&id=12Uqhpt-_3mDtTY6lW-jS8woLW6LBSXyI',
+    photo: 'https://raw.githubusercontent.com/momokhj/school_rule/main/stairs.jpg',
     rules: [
       '한 칸씩 올라가요',
       '한 칸씩 내려가요',
@@ -291,7 +291,7 @@ const SPACES = [
     emoji: '📚',
     badge: '독서 공간',
     url: '?space=library',
-    photo: 'https://drive.google.com/uc?export=view&id=1UxsKANNisggDbmg-Jw7j5uKMpQIhTnOD',
+    photo: 'https://raw.githubusercontent.com/momokhj/school_rule/main/library.jpg',
     rules: [
       '도서관 안에서는 조용히 해요',
       '읽은 책은 제자리에 꽂아요',
@@ -304,7 +304,7 @@ const SPACES = [
     emoji: '🍽',
     badge: '식사 공간',
     url: '?space=cafeteria',
-    photo: 'https://drive.google.com/uc?export=view&id=12Uqhpt-_3mDtTY6lW-jS8woLW6LBSXyI',
+    photo: 'https://raw.githubusercontent.com/momokhj/school_rule/main/cafeteria.jpg',
     rules: [
       '줄을 서서 차례대로 기다려요',
       '음식을 골고루 먹어요',
@@ -316,23 +316,12 @@ const SPACES = [
 /* ═══════════════════════════════════════
    저장/불러오기
 ═══════════════════════════════════════ */
-function loadData() {
-  try {
-    const saved = localStorage.getItem('schoolSpacesV2');
-    if (!saved) return;
-    const parsed = JSON.parse(saved);
-    SPACES.forEach(s => {
-      const found = parsed.find(p => p.id === s.id);
-      if (found) { s.photo = found.photo || ''; s.rules = found.rules || s.rules; }
-    });
-  } catch(e) {}
-}
 function saveData() {
   const payload = SPACES.map(s => ({ id: s.id, photo: s.photo, rules: s.rules }));
   localStorage.setItem('schoolSpacesV2', JSON.stringify(payload));
 }
 
-loadData();
+
 
 /* ═══════════════════════════════════════
    화면 전환

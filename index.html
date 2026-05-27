@@ -5,681 +5,655 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>우리 학교 탐험대</title>
 <style>
-  :root {
-    --primary: #2D6A4F;
-    --primary-light: #52B788;
-    --primary-pale: #D8F3DC;
-    --accent: #F77F00;
-    --bg: #F8FAF9;
-    --surface: #FFFFFF;
-    --text: #1B2E22;
-    --text-muted: #6B8C78;
-    --border: #C8E0CE;
-    --danger: #C0392B;
-    --danger-pale: #FDECEA;
-    --radius: 20px;
-    --shadow: 0 4px 24px rgba(45,106,79,0.10);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { height: 100%; font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
+:root {
+  --green-dark: #1B4332;
+  --green: #2D6A4F;
+  --green-mid: #40916C;
+  --green-light: #52B788;
+  --green-pale: #D8F3DC;
+  --amber: #F59E0B;
+  --bg: #F4F7F5;
+  --white: #FFFFFF;
+  --text: #1B2E22;
+  --muted: #6B8872;
+  --border: #CBD5CC;
+  --red: #DC2626;
+  --red-pale: #FEE2E2;
+  --r: 18px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif; background: var(--bg); color: var(--text); }
 
-  .screen { position: absolute; inset: 0; display: none; flex-direction: column; overflow: hidden; }
-  .screen.active { display: flex; }
+/* ─── 공통 버튼 ─── */
+.btn-primary { width: 100%; background: var(--green); color: #fff; border: none; border-radius: var(--r); padding: 15px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 10px; transition: background .15s, transform .1s; }
+.btn-primary:active { transform: scale(.97); background: var(--green-dark); }
+.btn-ghost { width: 100%; background: var(--white); color: var(--muted); border: 1.5px solid var(--border); border-radius: var(--r); padding: 13px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background .15s; }
+.btn-ghost:active { background: var(--green-pale); }
 
-  /* 관리자 화면은 전체 스크롤 허용 */
-  #adminScreen { overflow-y: auto; }
+/* ─── SCREEN 1: 스캔 ─── */
+#screen-scan {
+  min-height: 100vh;
+  background: linear-gradient(160deg, var(--green-dark) 0%, var(--green) 55%, var(--green-mid) 100%);
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: space-between; padding: 3rem 1.5rem 2.5rem;
+}
+.scan-title { text-align: center; }
+.scan-title .eyebrow { font-size: 12px; letter-spacing: .15em; color: rgba(255,255,255,.55); margin-bottom: 8px; }
+.scan-title h1 { font-size: 28px; font-weight: 700; color: #fff; line-height: 1.3; }
+.scan-title p { font-size: 14px; color: rgba(255,255,255,.65); margin-top: 6px; }
 
-  /* ── SCAN ── */
-  #scanScreen {
-    background: linear-gradient(160deg, #1B4332 0%, #2D6A4F 60%, #40916C 100%);
-    align-items: center; justify-content: space-between;
-    padding: 2.5rem 1.5rem 2rem;
-  }
-  .scan-header { text-align: center; }
-  .scan-header .app-title { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.6); margin-bottom: 8px; }
-  .scan-header h1 { font-size: 28px; font-weight: 700; color: #fff; line-height: 1.25; margin-bottom: 6px; }
-  .scan-header p { font-size: 13px; color: rgba(255,255,255,0.7); }
+.cam-box {
+  width: 270px; height: 270px; position: relative;
+  border-radius: 22px; overflow: hidden;
+  border: 2.5px solid rgba(255,255,255,.25);
+  background: rgba(0,0,0,.45); flex-shrink: 0;
+}
+#cam-video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cam-corner { position: absolute; width: 26px; height: 26px; z-index: 3; }
+.cam-corner.tl { top:8px; left:8px;  border-top: 3px solid var(--amber); border-left: 3px solid var(--amber); border-radius:6px 0 0 0; }
+.cam-corner.tr { top:8px; right:8px; border-top: 3px solid var(--amber); border-right:3px solid var(--amber); border-radius:0 6px 0 0; }
+.cam-corner.bl { bottom:8px; left:8px;  border-bottom:3px solid var(--amber); border-left: 3px solid var(--amber); border-radius:0 0 0 6px; }
+.cam-corner.br { bottom:8px; right:8px; border-bottom:3px solid var(--amber); border-right:3px solid var(--amber); border-radius:0 0 6px 0; }
+.scan-line { position:absolute; left:12px; right:12px; height:2px; background: linear-gradient(90deg,transparent,var(--amber),transparent); animation: scanmove 2s ease-in-out infinite; top:50%; z-index:2; display:none; }
+@keyframes scanmove { 0%,100%{transform:translateY(-95px);opacity:.5} 50%{transform:translateY(95px);opacity:1} }
 
-  /* 카메라 뷰 */
-  .camera-frame {
-    width: 260px; height: 260px; position: relative;
-    border-radius: 24px; overflow: hidden;
-    border: 3px solid rgba(255,255,255,0.3);
-    background: rgba(0,0,0,0.5);
-    flex-shrink: 0;
-  }
-  #videoEl { width: 100%; height: 100%; object-fit: cover; display: block; }
-  #camCanvas { display: none; }
-  .corner { position: absolute; width: 28px; height: 28px; z-index: 2; }
-  .corner.tl { top: 8px; left: 8px; border-top: 3px solid #FFBE0B; border-left: 3px solid #FFBE0B; border-radius: 6px 0 0 0; }
-  .corner.tr { top: 8px; right: 8px; border-top: 3px solid #FFBE0B; border-right: 3px solid #FFBE0B; border-radius: 0 6px 0 0; }
-  .corner.bl { bottom: 8px; left: 8px; border-bottom: 3px solid #FFBE0B; border-left: 3px solid #FFBE0B; border-radius: 0 0 0 6px; }
-  .corner.br { bottom: 8px; right: 8px; border-bottom: 3px solid #FFBE0B; border-right: 3px solid #FFBE0B; border-radius: 0 0 6px 0; }
-  .scan-line { position: absolute; left: 12px; right: 12px; height: 2px; background: linear-gradient(90deg, transparent, #FFBE0B, transparent); animation: scanMove 2s ease-in-out infinite; top: 50%; z-index: 2; }
-  @keyframes scanMove { 0%,100% { transform: translateY(-90px); opacity: 0.6; } 50% { transform: translateY(90px); opacity: 1; } }
+.cam-overlay { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:16px; z-index:4; }
+.cam-overlay .icon { font-size:38px; }
+.cam-overlay p { font-size:13px; color:rgba(255,255,255,.85); text-align:center; line-height:1.5; }
+.cam-start-btn { background:rgba(255,255,255,.18); border:1.5px solid rgba(255,255,255,.5); color:#fff; font-size:14px; font-weight:700; padding:9px 22px; border-radius:50px; cursor:pointer; font-family:inherit; }
+.cam-start-btn:active { background:rgba(255,255,255,.3); }
 
-  /* 카메라 상태 오버레이 */
-  .cam-status {
-    position: absolute; inset: 0; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; gap: 10px;
-    color: rgba(255,255,255,0.85); text-align: center; padding: 16px; z-index: 3;
-  }
-  .cam-status .cam-icon { font-size: 40px; }
-  .cam-status p { font-size: 13px; line-height: 1.5; }
-  .cam-start-btn {
-    background: rgba(255,255,255,0.18); border: 1.5px solid rgba(255,255,255,0.5);
-    color: #fff; font-size: 13px; font-weight: 700; padding: 8px 20px;
-    border-radius: 50px; cursor: pointer; font-family: inherit;
-    transition: background 0.2s;
-  }
-  .cam-start-btn:hover { background: rgba(255,255,255,0.3); }
+.scan-bottom { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+.admin-link { text-align:center; }
+.admin-link button { background:none; border:none; color:rgba(255,255,255,.5); font-size:13px; cursor:pointer; font-family:inherit; text-decoration:underline; padding:4px; }
 
-  /* QR 입력 fallback */
-  .scan-footer { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 10px; }
-  .manual-input-wrap { width: 100%; display: flex; gap: 8px; }
-  .manual-input {
-    flex: 1; background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.3);
-    color: #fff; font-size: 14px; padding: 10px 14px; border-radius: 14px;
-    font-family: inherit; outline: none;
-  }
-  .manual-input::placeholder { color: rgba(255,255,255,0.5); }
-  .manual-input:focus { border-color: #FFBE0B; }
-  .manual-go-btn {
-    background: #FFBE0B; border: none; color: #1B2E22;
-    font-size: 14px; font-weight: 700; padding: 10px 16px;
-    border-radius: 14px; cursor: pointer; font-family: inherit;
-    transition: background 0.2s;
-  }
-  .manual-go-btn:hover { background: #F77F00; color: #fff; }
-  .admin-btn {
-    background: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.22);
-    color: rgba(255,255,255,0.75); font-size: 13px; padding: 9px 22px;
-    border-radius: 50px; cursor: pointer; transition: background 0.2s; font-family: inherit;
-  }
-  .admin-btn:hover { background: rgba(255,255,255,0.2); }
+/* ─── SCREEN 2: 공간 탭 ─── */
+#screen-space { min-height:100vh; display:flex; flex-direction:column; background:var(--bg); }
 
-  /* ── DETAIL ── */
-  #detailScreen { background: var(--bg); }
-  .detail-hero { width: 100%; height: 52vw; max-height: 260px; position: relative; overflow: hidden; flex-shrink: 0; }
-  .detail-hero img { width: 100%; height: 100%; object-fit: cover; }
-  .detail-hero .hero-fallback { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 80px; }
-  .hero-overlay { position: absolute; inset: 0; background: linear-gradient(transparent 30%, rgba(0,0,0,0.55)); display: flex; align-items: flex-end; padding: 1.25rem; }
-  .hero-label { background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; padding: 4px 12px; border-radius: 50px; margin-bottom: 8px; display: inline-block; }
-  .hero-name { font-size: 28px; font-weight: 700; color: #fff; line-height: 1.2; }
-  .detail-body { flex: 1; overflow-y: auto; padding: 1.25rem; display: flex; flex-direction: column; gap: 14px; }
-  .rule-btn { width: 100%; background: var(--primary); color: #fff; border: none; border-radius: var(--radius); padding: 16px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 10px; transition: background 0.2s, transform 0.1s; box-shadow: var(--shadow); }
-  .rule-btn:hover { background: #1B4332; }
-  .rule-btn:active { transform: scale(0.97); }
-  .back-btn { width: 100%; background: var(--surface); color: var(--text-muted); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s; }
-  .back-btn:hover { background: var(--primary-pale); }
+.space-hero { position:relative; height:46vw; max-height:240px; flex-shrink:0; overflow:hidden; background:var(--green-pale); }
+.space-hero img { width:100%; height:100%; object-fit:cover; }
+.space-hero .emoji-fallback { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:70px; }
+.space-hero-overlay { position:absolute; inset:0; background:linear-gradient(transparent 35%,rgba(0,0,0,.5)); display:flex; align-items:flex-end; padding:1rem 1.2rem; }
+.space-badge { background:var(--amber); color:#fff; font-size:12px; font-weight:700; padding:3px 12px; border-radius:50px; margin-bottom:6px; display:inline-block; }
+.space-name { font-size:26px; font-weight:700; color:#fff; }
 
-  /* ── RULES ── */
-  #ruleScreen { background: var(--surface); }
-  .rule-header { background: var(--primary); padding: 2rem 1.5rem 1.5rem; flex-shrink: 0; }
-  .rule-header .badge { font-size: 12px; color: var(--primary-light); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
-  .rule-header h2 { font-size: 22px; font-weight: 700; color: #fff; }
-  .rule-header p { font-size: 13px; color: rgba(255,255,255,0.65); margin-top: 4px; }
-  .rule-content { flex: 1; overflow-y: auto; padding: 1.25rem; display: flex; flex-direction: column; gap: 12px; }
-  .rule-card { background: var(--bg); border: 1.5px solid var(--border); border-radius: 16px; padding: 1rem 1.25rem; display: flex; align-items: flex-start; gap: 14px; }
-  .rule-num { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; }
-  .rule-text { font-size: 15px; line-height: 1.6; color: var(--text); padding-top: 4px; }
-  .tts-row { padding: 1rem 1.25rem; flex-shrink: 0; display: flex; gap: 10px; }
-  .tts-btn { flex: 1; padding: 14px; border-radius: var(--radius); border: none; cursor: pointer; font-size: 15px; font-weight: 700; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s, transform 0.1s; }
-  .tts-btn:active { transform: scale(0.97); }
-  .tts-btn.play { background: var(--accent); color: #fff; }
-  .tts-btn.stop { background: var(--primary-pale); color: var(--primary); }
-  .rule-back-btn { margin: 0 1.25rem 1.5rem; width: calc(100% - 2.5rem); background: var(--surface); color: var(--text-muted); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s; }
-  .rule-back-btn:hover { background: var(--primary-pale); }
+/* 탭 */
+.tab-bar { display:flex; overflow-x:auto; background:var(--white); border-bottom:1px solid var(--border); flex-shrink:0; scrollbar-width:none; }
+.tab-bar::-webkit-scrollbar { display:none; }
+.tab-item { flex-shrink:0; padding:12px 16px; font-size:14px; font-weight:600; color:var(--muted); cursor:pointer; border-bottom:2.5px solid transparent; white-space:nowrap; transition:color .15s; }
+.tab-item.active { color:var(--green); border-bottom-color:var(--green); }
 
-  /* ── ADMIN ── */
-  #adminScreen { background: var(--bg); }
-  .admin-header { background: #1B2E22; padding: 1.5rem 1.5rem 1.25rem; flex-shrink: 0; }
-  .admin-header h2 { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 2px; }
-  .admin-header p { font-size: 13px; color: rgba(255,255,255,0.5); }
-  .admin-body { padding: 1.25rem; display: flex; flex-direction: column; gap: 14px; }
-  .admin-section-title { font-size: 12px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; }
+/* 탭 콘텐츠 */
+.tab-content { flex:1; overflow-y:auto; padding:1.2rem; display:flex; flex-direction:column; gap:12px; }
 
-  .sac { background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; overflow: hidden; }
-  .sac-header { display: flex; align-items: center; gap: 10px; padding: 14px 16px; cursor: pointer; }
-  .sac-emoji { font-size: 22px; flex-shrink: 0; }
-  .sac-name { font-size: 15px; font-weight: 700; color: var(--text); flex: 1; }
-  .sac-actions { display: flex; gap: 6px; }
-  .sac-move { background: none; border: 1px solid var(--border); border-radius: 8px; width: 28px; height: 28px; font-size: 14px; cursor: pointer; color: var(--text-muted); display: flex; align-items: center; justify-content: center; }
-  .sac-move:hover { background: var(--primary-pale); }
-  .sac-del { background: none; border: 1px solid #f5c6c2; border-radius: 8px; width: 28px; height: 28px; font-size: 14px; cursor: pointer; color: var(--danger); display: flex; align-items: center; justify-content: center; }
-  .sac-del:hover { background: var(--danger-pale); }
-  .sac-chevron { font-size: 16px; color: var(--text-muted); transition: transform 0.2s; flex-shrink: 0; }
-  .sac-chevron.open { transform: rotate(180deg); }
-  .sac-body { display: none; border-top: 1px solid var(--border); padding: 14px 16px 16px; }
-  .sac-body.open { display: block; }
+.rule-card { background:var(--white); border:1.5px solid var(--border); border-radius:14px; padding:.9rem 1.1rem; display:flex; align-items:flex-start; gap:12px; }
+.rule-num { width:30px; height:30px; border-radius:50%; background:var(--green); color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; flex-shrink:0; }
+.rule-text { font-size:15px; line-height:1.65; color:var(--text); padding-top:3px; }
 
-  .field-group { margin-bottom: 14px; }
-  .field-group:last-child { margin-bottom: 0; }
-  .field-label { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; display: block; }
-  .field-input, .field-textarea { width: 100%; background: var(--bg); border: 1.5px solid var(--border); border-radius: 12px; padding: 10px 14px; font-size: 14px; font-family: inherit; color: var(--text); outline: none; transition: border-color 0.2s; }
-  .field-input:focus, .field-textarea:focus { border-color: var(--primary-light); }
-  .field-textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
-  .field-row { display: flex; gap: 10px; }
-  .emoji-input { width: 64px !important; text-align: center; font-size: 20px; }
+.tts-row { display:flex; gap:10px; flex-shrink:0; padding:0 1.2rem; }
+.tts-btn { flex:1; padding:13px; border-radius:var(--r); border:none; cursor:pointer; font-size:15px; font-weight:700; font-family:inherit; display:flex; align-items:center; justify-content:center; gap:6px; }
+.tts-btn.play { background:var(--amber); color:#fff; }
+.tts-btn.stop { background:var(--green-pale); color:var(--green); }
 
-  .qr-preview-row { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
-  .qr-preview-box { width: 72px; height: 72px; border-radius: 10px; background: var(--bg); border: 1.5px dashed var(--border); display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--text-muted); text-align: center; overflow: hidden; flex-shrink: 0; }
-  .img-preview-box { width: 96px; height: 72px; border-radius: 10px; background: var(--bg); border: 1.5px dashed var(--border); display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--text-muted); text-align: center; overflow: hidden; flex-shrink: 0; }
-  .qr-preview-box img, .img-preview-box img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
-  .upload-btn { flex: 1; background: var(--primary-pale); color: var(--primary); border: 1.5px solid var(--primary-light); border-radius: 12px; padding: 10px; font-size: 13px; font-weight: 700; cursor: pointer; text-align: center; font-family: inherit; transition: background 0.2s; }
-  .upload-btn:hover { background: #B7E4C7; }
-  .hint { font-size: 11px; color: var(--text-muted); margin-top: 5px; }
+.nav-row { padding:1rem 1.2rem 2rem; display:flex; gap:10px; }
+.nav-row .btn-ghost { flex:1; }
 
-  .add-space-btn { width: 100%; background: var(--surface); border: 2px dashed var(--primary-light); border-radius: 16px; padding: 16px; font-size: 15px; font-weight: 700; color: var(--primary); cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s; }
-  .add-space-btn:hover { background: var(--primary-pale); }
-  .save-btn { width: 100%; background: var(--primary); color: #fff; border: none; border-radius: var(--radius); padding: 15px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; transition: background 0.2s, transform 0.1s; box-shadow: var(--shadow); }
-  .save-btn:hover { background: #1B4332; }
-  .save-btn:active { transform: scale(0.97); }
-  .admin-close-btn { margin: 0 1.25rem 2rem; width: calc(100% - 2.5rem); background: var(--surface); color: var(--text-muted); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s; }
-  .admin-close-btn:hover { background: var(--primary-pale); }
+/* ─── SCREEN 3: 관리자 ─── */
+#screen-admin { min-height:100vh; display:flex; flex-direction:column; background:var(--bg); }
+.admin-header { background:var(--green-dark); padding:1.5rem 1.2rem 1.2rem; flex-shrink:0; }
+.admin-header h2 { font-size:20px; font-weight:700; color:#fff; }
+.admin-header p { font-size:13px; color:rgba(255,255,255,.5); margin-top:3px; }
 
-  /* modals */
-  .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; display: flex; align-items: flex-end; justify-content: center; }
-  .modal-backdrop.hidden { display: none; }
-  .modal-sheet { background: var(--surface); border-radius: 24px 24px 0 0; padding: 1.5rem; width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 12px; }
-  .modal-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
-  .modal-btns { display: flex; gap: 10px; margin-top: 4px; }
-  .modal-confirm { flex: 1; background: var(--primary); color: #fff; border: none; border-radius: 14px; padding: 14px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; }
-  .modal-cancel { flex: 1; background: var(--bg); color: var(--text-muted); border: 1.5px solid var(--border); border-radius: 14px; padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.admin-scroll { flex:1; overflow-y:auto; padding:1.2rem; display:flex; flex-direction:column; gap:14px; }
 
-  .toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); background: #1B2E22; color: #fff; padding: 10px 20px; border-radius: 50px; font-size: 14px; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 999; white-space: nowrap; }
-  .toast.show { opacity: 1; }
-  input[type=file] { display: none; }
+.admin-card { background:var(--white); border:1.5px solid var(--border); border-radius:16px; overflow:hidden; }
+.admin-card-header { display:flex; align-items:center; gap:10px; padding:14px 16px; cursor:pointer; }
+.admin-card-header .ac-emoji { font-size:22px; }
+.admin-card-header .ac-name { font-size:15px; font-weight:700; color:var(--text); flex:1; }
+.admin-card-header .ac-chev { color:var(--muted); font-size:16px; transition:transform .2s; }
+.admin-card-header.open .ac-chev { transform:rotate(180deg); }
+.admin-card-body { display:none; border-top:1px solid var(--border); padding:14px 16px 16px; }
+.admin-card-body.open { display:flex; flex-direction:column; gap:14px; }
+
+.field-label { font-size:12px; font-weight:700; color:var(--muted); margin-bottom:6px; display:block; }
+.field-input, .field-textarea {
+  width:100%; background:var(--bg); border:1.5px solid var(--border); border-radius:12px;
+  padding:10px 14px; font-size:14px; font-family:inherit; color:var(--text); outline:none;
+  transition:border-color .2s;
+}
+.field-input:focus, .field-textarea:focus { border-color:var(--green-light); }
+.field-textarea { resize:vertical; min-height:90px; line-height:1.65; }
+
+.img-upload-row { display:flex; gap:10px; align-items:center; }
+.img-thumb { width:80px; height:64px; border-radius:10px; background:var(--bg); border:1.5px dashed var(--border); display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--muted); text-align:center; overflow:hidden; flex-shrink:0; }
+.img-thumb img { width:100%; height:100%; object-fit:cover; border-radius:9px; }
+.upload-btn { flex:1; background:var(--green-pale); color:var(--green); border:1.5px solid var(--green-light); border-radius:12px; padding:11px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; text-align:center; }
+.upload-btn:active { background:#B7E4C7; }
+
+.admin-save-btn { width:100%; background:var(--green); color:#fff; border:none; border-radius:var(--r); padding:15px; font-size:16px; font-weight:700; cursor:pointer; font-family:inherit; transition:background .15s; }
+.admin-save-btn:active { background:var(--green-dark); }
+
+.admin-close { margin-top:4px; }
+
+/* ─── 토스트 ─── */
+.toast { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%); background:var(--green-dark); color:#fff; padding:10px 22px; border-radius:50px; font-size:14px; opacity:0; pointer-events:none; transition:opacity .3s; z-index:999; white-space:nowrap; }
+.toast.show { opacity:1; }
+
+input[type=file] { display:none; }
 </style>
 </head>
 <body>
 
-<!-- ── SCAN ── -->
-<div class="screen active" id="scanScreen">
-  <div class="scan-header">
-    <div class="app-title">학교 탐험대</div>
+<!-- ══════════════════════════════
+     SCREEN 1: QR 스캔
+══════════════════════════════ -->
+<div id="screen-scan">
+  <div class="scan-title">
+    <div class="eyebrow">우리 학교 탐험대</div>
     <h1>QR코드를<br>찍어보세요!</h1>
-    <p>카메라로 QR코드를 인식해요</p>
+    <p>공간의 QR코드를 카메라로 인식해요</p>
   </div>
 
-  <div class="camera-frame">
-    <video id="videoEl" autoplay playsinline muted></video>
-    <canvas id="camCanvas"></canvas>
-
-    <!-- 카메라 시작 전 안내 -->
-    <div class="cam-status" id="camStatus">
-      <div class="cam-icon">📷</div>
+  <div class="cam-box">
+    <video id="cam-video" autoplay playsinline muted></video>
+    <canvas id="cam-canvas" style="display:none;"></canvas>
+    <div class="cam-corner tl"></div>
+    <div class="cam-corner tr"></div>
+    <div class="cam-corner bl"></div>
+    <div class="cam-corner br"></div>
+    <div class="scan-line" id="scan-line"></div>
+    <div class="cam-overlay" id="cam-overlay">
+      <div class="icon">📷</div>
       <p>카메라를 시작하면<br>QR코드를 자동으로 읽어요</p>
       <button class="cam-start-btn" onclick="startCamera()">카메라 시작</button>
     </div>
-
-    <div class="corner tl"></div><div class="corner tr"></div>
-    <div class="corner bl"></div><div class="corner br"></div>
-    <div class="scan-line" id="scanLine" style="display:none;"></div>
   </div>
 
-  <div class="scan-footer">
-    <div class="manual-input-wrap">
-      <input class="manual-input" id="manualInput" placeholder="QR 값 직접 입력 (예: library)" onkeydown="if(event.key==='Enter')manualGo()">
-      <button class="manual-go-btn" onclick="manualGo()">→</button>
+  <div class="scan-bottom">
+    <div class="admin-link">
+      <button onclick="showAdmin()">⚙️ 선생님 관리자 모드</button>
     </div>
-    <button class="admin-btn" onclick="showAdmin()">⚙️ 선생님 관리자 모드</button>
   </div>
 </div>
 
-<!-- ── DETAIL ── -->
-<div class="screen" id="detailScreen">
-  <div class="detail-hero">
-    <div class="hero-fallback" id="heroFallback" style="background:#D8F3DC;"></div>
-    <img id="heroImg" src="" alt="" style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
-    <div class="hero-overlay">
+<!-- ══════════════════════════════
+     SCREEN 2: 공간 정보
+══════════════════════════════ -->
+<div id="screen-space" style="display:none;">
+
+  <!-- 히어로 이미지 -->
+  <div class="space-hero">
+    <div class="emoji-fallback" id="hero-fallback"></div>
+    <img id="hero-img" src="" alt="" style="display:none;position:absolute;inset:0;">
+    <div class="space-hero-overlay">
       <div>
-        <div class="hero-label" id="heroLabel">공간</div>
-        <div class="hero-name" id="heroName">이름</div>
+        <div class="space-badge" id="hero-badge"></div>
+        <div class="space-name" id="hero-name"></div>
       </div>
     </div>
   </div>
-  <div class="detail-body">
-    <button class="rule-btn" onclick="showRules()">
-      <span style="font-size:22px;">📋</span><span>이용 규칙 알기</span>
-    </button>
-    <button class="back-btn" onclick="goHome()">← 처음으로 돌아가기</button>
-  </div>
-</div>
 
-<!-- ── RULES ── -->
-<div class="screen" id="ruleScreen">
-  <div class="rule-header">
-    <div class="badge">이용 규칙</div>
-    <h2 id="ruleSpaceName">공간 이름</h2>
-    <p>이 공간을 바르게 이용해요</p>
-  </div>
-  <div class="rule-content" id="ruleContent"></div>
+  <!-- 탭 바 -->
+  <div class="tab-bar" id="tab-bar"></div>
+
+  <!-- 탭 콘텐츠 -->
+  <div class="tab-content" id="tab-content"></div>
+
+  <!-- TTS + 네비 -->
   <div class="tts-row">
     <button class="tts-btn play" onclick="startTTS()">🔊 읽어주기</button>
     <button class="tts-btn stop" onclick="stopTTS()">⏹ 멈추기</button>
   </div>
-  <button class="rule-back-btn" onclick="goDetail()">← 공간 정보로 돌아가기</button>
+  <div class="nav-row">
+    <button class="btn-ghost" onclick="backToScan()">← 처음으로</button>
+  </div>
 </div>
 
-<!-- ── ADMIN ── -->
-<div class="screen" id="adminScreen">
+<!-- ══════════════════════════════
+     SCREEN 3: 관리자
+══════════════════════════════ -->
+<div id="screen-admin" style="display:none;">
   <div class="admin-header">
     <h2>⚙️ 관리자 모드</h2>
-    <p>공간을 자유롭게 추가·수정·삭제하세요</p>
+    <p>공간 사진과 이용 규칙을 수정하세요</p>
   </div>
-  <div class="admin-body" id="adminBody"></div>
-  <button class="admin-close-btn" onclick="goHome()">← 학생 화면으로 돌아가기</button>
-</div>
-
-<!-- NEW SPACE MODAL -->
-<div class="modal-backdrop hidden" id="newSpaceModal">
-  <div class="modal-sheet">
-    <div class="modal-title">➕ 새 공간 추가</div>
-    <div class="field-row">
-      <input class="field-input emoji-input" id="newEmoji" placeholder="🏫" maxlength="2">
-      <input class="field-input" id="newName" placeholder="공간 이름 (예: 보건실)">
-    </div>
-    <input class="field-input" id="newLabel" placeholder="공간 분류 (예: 의료 공간)">
-    <div class="modal-btns">
-      <button class="modal-cancel" onclick="closeNewModal()">취소</button>
-      <button class="modal-confirm" onclick="confirmNewSpace()">추가하기</button>
-    </div>
-  </div>
-</div>
-
-<!-- DELETE MODAL -->
-<div class="modal-backdrop hidden" id="delModal">
-  <div class="modal-sheet">
-    <div class="modal-title">🗑 공간 삭제</div>
-    <p style="font-size:14px;color:var(--text-muted);line-height:1.6;" id="delModalMsg"></p>
-    <div class="modal-btns">
-      <button class="modal-cancel" onclick="closeDelModal()">취소</button>
-      <button class="modal-confirm" style="background:var(--danger);" onclick="confirmDelete()">삭제</button>
+  <div class="admin-scroll">
+    <div id="admin-cards"></div>
+    <button class="admin-save-btn" onclick="saveAll()">💾 모두 저장</button>
+    <div class="admin-close">
+      <button class="btn-ghost" onclick="backToScan()">← 학생 화면으로</button>
     </div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
-<input type="file" id="qrFileInput" accept="image/*">
-<input type="file" id="imgFileInput" accept="image/*">
+<input type="file" id="file-img" accept="image/*">
 
 <script>
-/* ══ DATA ══ */
-const defaultSpaces = [
-  { id:'hallway',    name:'복도',      emoji:'🚶', label:'이동 공간', photo:'', qrCode:'hallway',    rules:['오른쪽으로 조용히 걸어요','뛰거나 소리를 지르지 않아요','친구의 물건을 건드리지 않아요','작품을 손으로 만지지 않아요'] },
-  { id:'ramp',       name:'경사로',    emoji:'♿', label:'이동 편의', photo:'', qrCode:'ramp',       rules:['휠체어 친구가 먼저 이용해요','경사로에서 뛰지 않아요','손잡이를 잡고 이동해요','필요한 친구를 도와줘요'] },
-  { id:'elevator',   name:'엘리베이터',emoji:'🛗', label:'이동 편의', photo:'', qrCode:'elevator',   rules:['도움이 필요한 친구를 먼저 타게 해요','뛰거나 장난치지 않아요','버튼을 여러 번 누르지 않아요','문이 닫힐 때 무리하게 타지 않아요'] },
-  { id:'cafeteria',  name:'급식실',    emoji:'🍽', label:'식사 공간', photo:'', qrCode:'cafeteria',  rules:['줄을 서서 차례대로 기다려요','음식을 남기지 않으려고 노력해요','식판은 정해진 곳에 반납해요','음식을 가지고 돌아다니지 않아요'] },
-  { id:'library',    name:'도서관',    emoji:'📚', label:'독서 공간', photo:'', qrCode:'library',    rules:['도서관에서는 조용히 해요','책을 읽은 후 제자리에 꽂아요','책을 빌릴 때 선생님께 말씀드려요','음식물을 가지고 들어오지 않아요'] },
-  { id:'auditorium', name:'강당',      emoji:'🎭', label:'행사 공간', photo:'', qrCode:'auditorium', rules:['선생님 말씀에 귀 기울여요','공연 중에 조용히 관람해요','자기 자리에 앉아 이동하지 않아요','강당 물건을 함부로 만지지 않아요'] }
+/* ═══════════════════════════════════════
+   공간 데이터
+═══════════════════════════════════════ */
+const SPACES = [
+  {
+    id: 'hallway',
+    name: '복도',
+    emoji: '🚶',
+    badge: '이동 공간',
+    url: '?space=hallway',
+    photo: '',
+    rules: [
+      '오른쪽으로 조용히 걸어요',
+      '뛰거나 소리를 지르지 않아요',
+      '전시된 작품을 손으로 만지지 않아요',
+      '친구와 장난치며 부딪히지 않아요'
+    ]
+  },
+  {
+    id: 'ramp',
+    name: '경사로',
+    emoji: '♿',
+    badge: '무장애 이동',
+    url: '?space=ramp',
+    photo: '',
+    rules: [
+      '휠체어를 타는 친구가 먼저 이용해요',
+      '경사로에서 뛰거나 미끄러지지 않아요',
+      '양쪽 손잡이를 잡고 천천히 이동해요',
+      '도움이 필요한 친구를 기다려 줘요'
+    ]
+  },
+  {
+    id: 'elevator',
+    name: '엘리베이터',
+    emoji: '🛗',
+    badge: '우선 이용 시설',
+    url: '?space=elevator',
+    photo: '',
+    rules: [
+      '도움이 필요한 친구를 먼저 탑승하게 해요',
+      '엘리베이터 안에서 뛰거나 장난치지 않아요',
+      '버튼을 여러 번 누르지 않아요',
+      '문이 닫힐 때 무리하게 타지 않아요'
+    ]
+  },
+  {
+    id: 'stairs',
+    name: '계단',
+    emoji: '🪜',
+    badge: '이동 공간',
+    url: '?space=stairs',
+    photo: '',
+    rules: [
+      '오른쪽으로 한 줄로 올라가고 내려와요',
+      '손잡이를 잡고 천천히 이동해요',
+      '계단에서 뛰거나 점프하지 않아요',
+      '장난치며 밀거나 당기지 않아요'
+    ]
+  },
+  {
+    id: 'library',
+    name: '도서관',
+    emoji: '📚',
+    badge: '독서 공간',
+    url: '?space=library',
+    photo: '',
+    rules: [
+      '도서관 안에서는 조용히 해요',
+      '읽은 책은 제자리에 꽂아요',
+      '책을 빌릴 때 선생님께 말씀드려요',
+      '음식물을 가지고 들어오지 않아요'
+    ]
+  },
+  {
+    id: 'cafeteria',
+    name: '급식실',
+    emoji: '🍽',
+    badge: '식사 공간',
+    url: '?space=cafeteria',
+    photo: '',
+    rules: [
+      '줄을 서서 차례대로 기다려요',
+      '음식을 감사하게 받아요',
+      '가능하면 음식을 남기지 않아요',
+      '식판은 정해진 곳에 반납해요'
+    ]
+  }
 ];
 
-let spaces = loadSpaces();
-let currentSpace = null;
-let videoStream = null;
-let scanInterval = null;
-let editingQrId = null;
-let editingImgId = null;
-let deletingId = null;
+/* ═══════════════════════════════════════
+   저장/불러오기
+═══════════════════════════════════════ */
+function loadData() {
+  try {
+    const saved = localStorage.getItem('schoolSpacesV2');
+    if (!saved) return;
+    const parsed = JSON.parse(saved);
+    SPACES.forEach(s => {
+      const found = parsed.find(p => p.id === s.id);
+      if (found) { s.photo = found.photo || ''; s.rules = found.rules || s.rules; }
+    });
+  } catch(e) {}
+}
+function saveData() {
+  const payload = SPACES.map(s => ({ id: s.id, photo: s.photo, rules: s.rules }));
+  localStorage.setItem('schoolSpacesV2', JSON.stringify(payload));
+}
 
-function loadSpaces() {
-  try { const s = localStorage.getItem('schoolSpaces'); if (s) return JSON.parse(s); } catch(e) {}
-  return JSON.parse(JSON.stringify(defaultSpaces));
-}
-function saveSpaces() {
-  try { localStorage.setItem('schoolSpaces', JSON.stringify(spaces)); } catch(e) {}
-}
-function genId() { return 'sp_' + Date.now() + '_' + Math.random().toString(36).slice(2,6); }
+loadData();
 
-/* ══ SCREENS ══ */
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+/* ═══════════════════════════════════════
+   화면 전환
+═══════════════════════════════════════ */
+let currentSpaceId = null;
+
+function showScan() {
+  document.getElementById('screen-scan').style.display = 'flex';
+  document.getElementById('screen-space').style.display = 'none';
+  document.getElementById('screen-admin').style.display = 'none';
 }
-function goHome() {
-  stopTTS();
+function showSpace(id) {
   stopCamera();
-  showScreen('scanScreen');
+  currentSpaceId = id;
+  renderSpaceScreen(id);
+  document.getElementById('screen-scan').style.display = 'none';
+  document.getElementById('screen-space').style.display = 'flex';
+  document.getElementById('screen-admin').style.display = 'none';
 }
-function goDetail() { stopTTS(); showScreen('detailScreen'); }
+function showAdmin() {
+  stopCamera();
+  renderAdmin();
+  document.getElementById('screen-scan').style.display = 'none';
+  document.getElementById('screen-space').style.display = 'none';
+  document.getElementById('screen-admin').style.display = 'flex';
+}
+function backToScan() {
+  stopTTS();
+  showScan();
+}
 
-/* ══ CAMERA + QR ══ */
+/* ═══════════════════════════════════════
+   공간 화면 렌더
+═══════════════════════════════════════ */
+function renderSpaceScreen(id) {
+  const space = SPACES.find(s => s.id === id);
+  if (!space) return;
+
+  // 히어로
+  document.getElementById('hero-badge').textContent = space.badge;
+  document.getElementById('hero-name').textContent = space.name;
+  const fb = document.getElementById('hero-fallback');
+  const img = document.getElementById('hero-img');
+  fb.textContent = space.emoji;
+  if (space.photo) {
+    img.src = space.photo; img.style.display = 'block'; fb.style.display = 'none';
+  } else {
+    img.style.display = 'none'; fb.style.display = 'flex';
+  }
+
+  // 탭 바 — 모든 공간 탭
+  const tabBar = document.getElementById('tab-bar');
+  tabBar.innerHTML = SPACES.map(s =>
+    `<div class="tab-item ${s.id === id ? 'active' : ''}" onclick="switchTab('${s.id}')">${s.emoji} ${s.name}</div>`
+  ).join('');
+
+  // 규칙 콘텐츠
+  renderRules(space);
+}
+
+function switchTab(id) {
+  currentSpaceId = id;
+  const space = SPACES.find(s => s.id === id);
+  stopTTS();
+
+  // 히어로 업데이트
+  document.getElementById('hero-badge').textContent = space.badge;
+  document.getElementById('hero-name').textContent = space.name;
+  const fb = document.getElementById('hero-fallback');
+  const img = document.getElementById('hero-img');
+  fb.textContent = space.emoji;
+  if (space.photo) {
+    img.src = space.photo; img.style.display = 'block'; fb.style.display = 'none';
+  } else {
+    img.style.display = 'none'; fb.style.display = 'flex';
+  }
+
+  // 탭 활성화
+  document.querySelectorAll('.tab-item').forEach((el, i) => {
+    el.classList.toggle('active', SPACES[i].id === id);
+  });
+
+  renderRules(space);
+}
+
+function renderRules(space) {
+  document.getElementById('tab-content').innerHTML = (space.rules || []).map((r, i) => `
+    <div class="rule-card">
+      <div class="rule-num">${i + 1}</div>
+      <div class="rule-text">${r}</div>
+    </div>
+  `).join('');
+}
+
+/* ═══════════════════════════════════════
+   TTS
+═══════════════════════════════════════ */
+function startTTS() {
+  const space = SPACES.find(s => s.id === currentSpaceId);
+  if (!space) return;
+  stopTTS();
+  const text = `${space.name} 이용 규칙입니다. ` +
+    space.rules.map((r, i) => `${i + 1}번. ${r}`).join('. ');
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'ko-KR'; u.rate = 0.88; u.pitch = 1.05;
+  speechSynthesis.speak(u);
+}
+function stopTTS() { speechSynthesis.cancel(); }
+
+/* ═══════════════════════════════════════
+   카메라 & QR 스캔
+═══════════════════════════════════════ */
+let camStream = null;
+let scanTimer = null;
+
 async function startCamera() {
-  const status = document.getElementById('camStatus');
-  status.innerHTML = '<div class="cam-icon" style="animation:spin 1s linear infinite">⏳</div><p>카메라 연결 중...</p>';
+  const overlay = document.getElementById('cam-overlay');
+  overlay.innerHTML = '<div class="icon" style="animation:spin 1s linear infinite">⏳</div><p>카메라 연결 중...</p>';
 
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({
+    camStream = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: { ideal: 'environment' }, width: { ideal: 640 }, height: { ideal: 640 } }
     });
-    videoStream = stream;
-    const video = document.getElementById('videoEl');
-    video.srcObject = stream;
+    const video = document.getElementById('cam-video');
+    video.srcObject = camStream;
     video.onloadedmetadata = () => {
       video.play();
-      status.style.display = 'none';
-      document.getElementById('scanLine').style.display = 'block';
-      startQRScan();
+      overlay.style.display = 'none';
+      document.getElementById('scan-line').style.display = 'block';
+      beginScan();
     };
-  } catch(err) {
-    status.innerHTML = `
-      <div class="cam-icon">🚫</div>
-      <p>카메라를 사용할 수 없어요<br><small style="opacity:.7">${err.message}</small></p>
-      <p style="font-size:12px;opacity:.65;margin-top:4px;">아래 입력란에 QR 값을 직접 입력하세요</p>`;
+  } catch(e) {
+    overlay.innerHTML = `<div class="icon">🚫</div><p>카메라를 사용할 수 없어요</p><button class="cam-start-btn" onclick="startCamera()">다시 시도</button>`;
   }
 }
 
 function stopCamera() {
-  clearInterval(scanInterval); scanInterval = null;
-  if (videoStream) { videoStream.getTracks().forEach(t => t.stop()); videoStream = null; }
-  const video = document.getElementById('videoEl');
+  clearInterval(scanTimer); scanTimer = null;
+  if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
+  const video = document.getElementById('cam-video');
   video.srcObject = null;
-  document.getElementById('scanLine').style.display = 'none';
-  const status = document.getElementById('camStatus');
-  status.style.display = 'flex';
-  status.innerHTML = `
-    <div class="cam-icon">📷</div>
-    <p>카메라를 시작하면<br>QR코드를 자동으로 읽어요</p>
-    <button class="cam-start-btn" onclick="startCamera()">카메라 시작</button>`;
+  document.getElementById('scan-line').style.display = 'none';
+  const overlay = document.getElementById('cam-overlay');
+  overlay.style.display = 'flex';
+  overlay.innerHTML = `<div class="icon">📷</div><p>카메라를 시작하면<br>QR코드를 자동으로 읽어요</p><button class="cam-start-btn" onclick="startCamera()">카메라 시작</button>`;
 }
 
-function startQRScan() {
-  if (typeof BarcodeDetector === 'undefined') {
-    // BarcodeDetector 미지원 환경 → jsQR fallback
-    loadJsQR();
-    return;
+function beginScan() {
+  // BarcodeDetector 우선
+  if (typeof BarcodeDetector !== 'undefined') {
+    const det = new BarcodeDetector({ formats: ['qr_code'] });
+    const video = document.getElementById('cam-video');
+    scanTimer = setInterval(async () => {
+      if (video.readyState < 2) return;
+      try {
+        const codes = await det.detect(video);
+        if (codes.length) handleQR(codes[0].rawValue);
+      } catch(e) {}
+    }, 350);
+  } else {
+    loadJsQR(beginJsQRScan);
   }
-  const detector = new BarcodeDetector({ formats: ['qr_code'] });
-  const video = document.getElementById('videoEl');
-  scanInterval = setInterval(async () => {
-    if (video.readyState !== video.HAVE_ENOUGH_DATA) return;
-    try {
-      const codes = await detector.detect(video);
-      if (codes.length > 0) handleQRResult(codes[0].rawValue);
-    } catch(e) {}
-  }, 400);
 }
 
-function loadJsQR() {
-  const s = document.createElement('script');
-  s.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';
-  s.onload = startJsQRScan;
-  s.onerror = () => showToast('QR 스캔을 지원하지 않는 환경이에요. 직접 입력해 주세요.');
-  document.head.appendChild(s);
-}
-
-function startJsQRScan() {
-  const video = document.getElementById('videoEl');
-  const canvas = document.getElementById('camCanvas');
+function beginJsQRScan() {
+  const video = document.getElementById('cam-video');
+  const canvas = document.getElementById('cam-canvas');
   const ctx = canvas.getContext('2d');
-  scanInterval = setInterval(() => {
-    if (video.readyState !== video.HAVE_ENOUGH_DATA) return;
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+  scanTimer = setInterval(() => {
+    if (video.readyState < 2) return;
+    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
     ctx.drawImage(video, 0, 0);
-    const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const code = jsQR(img.data, img.width, img.height, { inversionAttempts: 'dontInvert' });
-    if (code) handleQRResult(code.data);
-  }, 300);
+    const d = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const code = jsQR(d.data, d.width, d.height, { inversionAttempts: 'dontInvert' });
+    if (code) handleQR(code.data);
+  }, 280);
 }
 
-function handleQRResult(decoded) {
-  clearInterval(scanInterval); scanInterval = null;
-  stopCamera();
-  const space = spaces.find(s => s.qrCode === decoded || s.id === decoded);
-  if (space) {
-    openSpace(space);
-  } else {
-    showToast('등록된 공간의 QR코드가 아니에요');
-    setTimeout(startCamera, 1800);
-  }
-}
-
-/* 직접 입력 */
-function manualGo() {
-  const val = document.getElementById('manualInput').value.trim();
-  if (!val) return;
-  const space = spaces.find(s => s.qrCode === val || s.id === val || s.name === val);
-  if (space) {
-    document.getElementById('manualInput').value = '';
-    openSpace(space);
-  } else {
-    showToast('일치하는 공간이 없어요');
-  }
-}
-
-/* ══ DETAIL ══ */
-function openSpace(space) {
-  currentSpace = space;
-  document.getElementById('heroLabel').textContent = space.label || '공간';
-  document.getElementById('heroName').textContent = space.name;
-  const fb = document.getElementById('heroFallback');
-  fb.textContent = space.emoji; fb.style.display = 'flex';
-  const img = document.getElementById('heroImg');
-  if (space.photo) { img.src = space.photo; img.style.display = 'block'; fb.style.display = 'none'; }
-  else { img.style.display = 'none'; }
-  showScreen('detailScreen');
-}
-
-/* ══ RULES ══ */
-function showRules() {
-  if (!currentSpace) return;
-  document.getElementById('ruleSpaceName').textContent = currentSpace.name + ' 이용 규칙';
-  document.getElementById('ruleContent').innerHTML = (currentSpace.rules||[]).map((r,i)=>`
-    <div class="rule-card"><div class="rule-num">${i+1}</div><div class="rule-text">${r}</div></div>`).join('');
-  showScreen('ruleScreen');
-}
-
-/* ══ TTS ══ */
-let utterance = null;
-function startTTS() {
-  if (!currentSpace) return;
-  stopTTS();
-  const text = `${currentSpace.name} 이용 규칙입니다. ` + (currentSpace.rules||[]).map((r,i)=>`${i+1}번. ${r}`).join('. ');
-  utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = 'ko-KR'; utterance.rate = 0.9; utterance.pitch = 1.05;
-  speechSynthesis.speak(utterance);
-}
-function stopTTS() { speechSynthesis.cancel(); utterance = null; }
-
-/* ══ ADMIN ══ */
-function showAdmin() { stopCamera(); renderAdmin(); showScreen('adminScreen'); }
-
-function renderAdmin() {
-  const body = document.getElementById('adminBody');
-  body.innerHTML =
-    `<div class="admin-section-title">공간 목록 (${spaces.length}개)</div>` +
-    spaces.map((s,i) => renderSAC(s,i)).join('') +
-    `<button class="add-space-btn" onclick="openNewModal()">➕ 새 공간 추가</button>
-     <button class="save-btn" onclick="saveAll()">💾 모든 설정 저장</button>
-     <div style="height:8px;"></div>`;
-}
-
-function renderSAC(s, i) {
-  const isFirst = i === 0, isLast = i === spaces.length - 1;
-  return `
-  <div class="sac" id="sac_${s.id}">
-    <div class="sac-header" onclick="toggleSAC('${s.id}')">
-      <span class="sac-emoji">${s.emoji}</span>
-      <span class="sac-name">${s.name}</span>
-      <div class="sac-actions" onclick="event.stopPropagation()">
-        <button class="sac-move" onclick="moveSpace('${s.id}',-1)" ${isFirst?'disabled style="opacity:.3"':''}>↑</button>
-        <button class="sac-move" onclick="moveSpace('${s.id}',1)"  ${isLast?'disabled style="opacity:.3"':''}>↓</button>
-        <button class="sac-del"  onclick="askDelete('${s.id}')">✕</button>
-      </div>
-      <span class="sac-chevron" id="chev_${s.id}">▾</span>
-    </div>
-    <div class="sac-body" id="sab_${s.id}">
-      <div class="field-group">
-        <label class="field-label">🏷 이름 / 이모지 / 분류</label>
-        <div class="field-row" style="margin-bottom:8px;">
-          <input class="field-input emoji-input" id="f_emoji_${s.id}" value="${s.emoji}" maxlength="2">
-          <input class="field-input" id="f_name_${s.id}" value="${s.name}" placeholder="공간 이름">
-        </div>
-        <input class="field-input" id="f_label_${s.id}" value="${s.label||''}" placeholder="공간 분류">
-      </div>
-      <div class="field-group">
-        <label class="field-label">📷 공간 사진</label>
-        <div class="qr-preview-row">
-          <div class="img-preview-box" id="imgPrev_${s.id}">${s.photo?`<img src="${s.photo}">`:'미리보기'}</div>
-          <button class="upload-btn" onclick="openImgUpload('${s.id}')">사진 업로드</button>
-        </div>
-        <input class="field-input" id="f_photo_${s.id}" placeholder="또는 사진 URL" value="${s.photo||''}" oninput="previewPhoto('${s.id}')" style="margin-top:8px;">
-      </div>
-      <div class="field-group">
-        <label class="field-label">🔲 QR코드 값</label>
-        <div class="qr-preview-row">
-          <div class="qr-preview-box" id="qrPrev_${s.id}">${s.qrCode?'✔ 등록됨':'QR 없음'}</div>
-          <button class="upload-btn" onclick="openQRUpload('${s.id}')">QR 이미지로<br>자동 인식</button>
-        </div>
-        <input class="field-input" id="f_qr_${s.id}" placeholder="QR 값 (예: ${s.id})" value="${s.qrCode||''}" style="margin-top:8px;">
-        <p class="hint">💡 <a href="https://www.qrcode-monkey.com/" target="_blank" style="color:var(--primary)">qrcode-monkey.com</a>에서 이 값으로 QR을 만드세요</p>
-      </div>
-      <div class="field-group">
-        <label class="field-label">📋 이용 규칙 (한 줄에 하나씩)</label>
-        <textarea class="field-textarea" id="f_rules_${s.id}" rows="5">${(s.rules||[]).join('\n')}</textarea>
-      </div>
-    </div>
-  </div>`;
-}
-
-function toggleSAC(id) {
-  document.getElementById('sab_'+id).classList.toggle('open');
-  document.getElementById('chev_'+id).classList.toggle('open');
-}
-
-/* ══ SPACE CRUD ══ */
-function moveSpace(id, dir) {
-  collectCurrentValues();
-  const idx = spaces.findIndex(s => s.id === id);
-  const ni = idx + dir;
-  if (ni < 0 || ni >= spaces.length) return;
-  [spaces[idx], spaces[ni]] = [spaces[ni], spaces[idx]];
-  renderAdmin();
-  showToast(dir < 0 ? '위로 이동했어요' : '아래로 이동했어요');
-}
-
-function askDelete(id) {
-  deletingId = id;
-  const s = spaces.find(x => x.id === id);
-  document.getElementById('delModalMsg').textContent = `"${s?.name||''}" 공간을 삭제할까요? 삭제 후에는 되돌릴 수 없어요.`;
-  document.getElementById('delModal').classList.remove('hidden');
-}
-function closeDelModal() { document.getElementById('delModal').classList.add('hidden'); deletingId = null; }
-function confirmDelete() {
-  if (!deletingId) return;
-  spaces = spaces.filter(s => s.id !== deletingId);
-  closeDelModal(); renderAdmin(); showToast('공간을 삭제했어요');
-}
-
-function openNewModal() { document.getElementById('newSpaceModal').classList.remove('hidden'); document.getElementById('newName').focus(); }
-function closeNewModal() { document.getElementById('newSpaceModal').classList.add('hidden'); }
-function confirmNewSpace() {
-  const emoji = document.getElementById('newEmoji').value.trim() || '🏫';
-  const name  = document.getElementById('newName').value.trim();
-  const label = document.getElementById('newLabel').value.trim() || '학교 공간';
-  if (!name) { showToast('공간 이름을 입력해 주세요'); return; }
-  collectCurrentValues();
-  spaces.push({ id: genId(), name, emoji, label, photo:'', qrCode:'', rules:['이 공간을 바르게 사용해요'] });
-  closeNewModal();
-  ['newEmoji','newName','newLabel'].forEach(id => document.getElementById(id).value = '');
-  renderAdmin(); showToast(`"${name}" 공간을 추가했어요`);
-}
-
-function collectCurrentValues() {
-  spaces.forEach(s => {
-    const g = id => { const el = document.getElementById(id); return el ? el.value.trim() : null; };
-    const n = g('f_name_'+s.id); if (n !== null) s.name  = n || s.name;
-    const e = g('f_emoji_'+s.id); if (e !== null) s.emoji = e || s.emoji;
-    const l = g('f_label_'+s.id); if (l !== null) s.label = l;
-    const p = g('f_photo_'+s.id); if (p !== null) s.photo = p;
-    const q = g('f_qr_'+s.id);   if (q !== null) s.qrCode = q;
-    const r = document.getElementById('f_rules_'+s.id);
-    if (r) s.rules = r.value.split('\n').map(x=>x.trim()).filter(Boolean);
-  });
-}
-
-function saveAll() { collectCurrentValues(); saveSpaces(); showToast('✅ 저장 완료!'); }
-
-/* ══ UPLOADS ══ */
-function previewPhoto(id) {
-  const val = document.getElementById('f_photo_'+id).value.trim();
-  document.getElementById('imgPrev_'+id).innerHTML = val ? `<img src="${val}" onerror="this.parentElement.textContent='오류'">` : '미리보기';
-}
-
-function openQRUpload(id) {
-  editingQrId = id;
-  const inp = document.getElementById('qrFileInput'); inp.value=''; inp.click();
-}
-document.getElementById('qrFileInput').addEventListener('change', function() {
-  if (!this.files[0] || !editingQrId) return;
-  const id = editingQrId;
-  // jsQR로 업로드 이미지에서 QR 읽기
-  const fr = new FileReader();
-  fr.onload = e => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width; canvas.height = img.height;
-      canvas.getContext('2d').drawImage(img, 0, 0);
-      const imageData = canvas.getContext('2d').getImageData(0, 0, img.width, img.height);
-      if (typeof jsQR !== 'undefined') {
-        const code = jsQR(imageData.data, img.width, img.height);
-        if (code) {
-          document.getElementById('f_qr_'+id).value = code.data;
-          document.getElementById('qrPrev_'+id).textContent = '✔ ' + code.data.slice(0,12);
-          showToast('QR 인식: ' + code.data);
-        } else { showToast('QR 인식 실패. 직접 입력해 주세요.'); }
-      } else {
-        loadJsQRThen(() => {
-          const code = jsQR(imageData.data, img.width, img.height);
-          if (code) {
-            document.getElementById('f_qr_'+id).value = code.data;
-            document.getElementById('qrPrev_'+id).textContent = '✔ ' + code.data.slice(0,12);
-            showToast('QR 인식: ' + code.data);
-          } else { showToast('QR 인식 실패. 직접 입력해 주세요.'); }
-        });
-      }
-    };
-    img.src = e.target.result;
-  };
-  fr.readAsDataURL(this.files[0]);
-});
-
-function loadJsQRThen(cb) {
+function loadJsQR(cb) {
   if (typeof jsQR !== 'undefined') { cb(); return; }
   const s = document.createElement('script');
   s.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';
-  s.onload = cb; document.head.appendChild(s);
+  s.onload = cb;
+  s.onerror = () => showToast('QR 스캔을 지원하지 않는 환경이에요');
+  document.head.appendChild(s);
 }
 
-function openImgUpload(id) {
-  editingImgId = id;
-  const inp = document.getElementById('imgFileInput'); inp.value=''; inp.click();
+function handleQR(raw) {
+  clearInterval(scanTimer); scanTimer = null;
+
+  // URL 파라미터 방식: ?space=hallway 또는 전체 URL 포함
+  let spaceId = raw;
+  try {
+    const url = new URL(raw);
+    spaceId = url.searchParams.get('space') || raw;
+  } catch(e) {
+    // URL이 아니면 raw 값 그대로 사용
+  }
+  // ?space=hallway 형태 (URL 아닌 경우)
+  if (spaceId.startsWith('?space=')) spaceId = spaceId.replace('?space=', '');
+
+  const found = SPACES.find(s => s.id === spaceId);
+  if (found) {
+    showSpace(found.id);
+  } else {
+    showToast('등록된 공간의 QR코드가 아니에요');
+    setTimeout(beginScan, 1800);
+  }
 }
-document.getElementById('imgFileInput').addEventListener('change', function() {
+
+/* ═══════════════════════════════════════
+   URL 파라미터로 직접 진입
+═══════════════════════════════════════ */
+function checkURLParam() {
+  const params = new URLSearchParams(location.search);
+  const spaceParam = params.get('space');
+  if (spaceParam) {
+    const found = SPACES.find(s => s.id === spaceParam);
+    if (found) showSpace(found.id);
+  }
+}
+
+/* ═══════════════════════════════════════
+   관리자 화면
+═══════════════════════════════════════ */
+let editingImgId = null;
+
+function renderAdmin() {
+  document.getElementById('admin-cards').innerHTML = SPACES.map(s => `
+    <div class="admin-card">
+      <div class="admin-card-header" onclick="toggleAC('${s.id}')">
+        <span class="ac-emoji">${s.emoji}</span>
+        <span class="ac-name">${s.name}</span>
+        <span class="ac-chev">▾</span>
+      </div>
+      <div class="admin-card-body" id="acb_${s.id}">
+
+        <div>
+          <label class="field-label">📷 공간 사진</label>
+          <div class="img-upload-row">
+            <div class="img-thumb" id="thumb_${s.id}">
+              ${s.photo ? `<img src="${s.photo}">` : '사진 없음'}
+            </div>
+            <button class="upload-btn" onclick="openImgPicker('${s.id}')">📁 사진 선택</button>
+          </div>
+          <input class="field-input" id="photo_url_${s.id}" placeholder="또는 URL 직접 입력"
+            value="${s.photo || ''}" oninput="previewPhoto('${s.id}')" style="margin-top:8px;">
+        </div>
+
+        <div>
+          <label class="field-label">📋 이용 규칙 (한 줄에 하나씩)</label>
+          <textarea class="field-textarea" id="rules_${s.id}" rows="6">${(s.rules || []).join('\n')}</textarea>
+        </div>
+
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleAC(id) {
+  const body = document.getElementById('acb_' + id);
+  const header = body.previousElementSibling;
+  body.classList.toggle('open');
+  header.classList.toggle('open');
+}
+
+function previewPhoto(id) {
+  const val = document.getElementById('photo_url_' + id).value.trim();
+  const thumb = document.getElementById('thumb_' + id);
+  thumb.innerHTML = val ? `<img src="${val}" onerror="this.parentElement.textContent='오류'">` : '사진 없음';
+}
+
+function openImgPicker(id) {
+  editingImgId = id;
+  const inp = document.getElementById('file-img');
+  inp.value = ''; inp.click();
+}
+
+document.getElementById('file-img').addEventListener('change', function () {
   if (!this.files[0] || !editingImgId) return;
   const id = editingImgId;
-  const fr = new FileReader();
-  fr.onload = e => {
+  const reader = new FileReader();
+  reader.onload = e => {
     const b64 = e.target.result;
-    document.getElementById('f_photo_'+id).value = b64;
-    document.getElementById('imgPrev_'+id).innerHTML = `<img src="${b64}">`;
+    document.getElementById('photo_url_' + id).value = b64;
+    document.getElementById('thumb_' + id).innerHTML = `<img src="${b64}">`;
   };
-  fr.readAsDataURL(this.files[0]);
+  reader.readAsDataURL(this.files[0]);
 });
 
-/* ══ TOAST ══ */
+function saveAll() {
+  SPACES.forEach(s => {
+    const urlEl = document.getElementById('photo_url_' + s.id);
+    const rulesEl = document.getElementById('rules_' + s.id);
+    if (urlEl) s.photo = urlEl.value.trim();
+    if (rulesEl) s.rules = rulesEl.value.split('\n').map(r => r.trim()).filter(Boolean);
+  });
+  saveData();
+  showToast('✅ 저장 완료!');
+}
+
+/* ═══════════════════════════════════════
+   토스트
+═══════════════════════════════════════ */
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2800);
 }
 
-/* ══ INIT ══ */
-// 기본 QR값 자동 세팅 (저장된 값 없으면 id를 QR값으로 사용)
-spaces.forEach(s => { if (!s.qrCode) s.qrCode = s.id; });
+/* ═══════════════════════════════════════
+   초기화
+═══════════════════════════════════════ */
+checkURLParam();
 </script>
 </body>
 </html>
